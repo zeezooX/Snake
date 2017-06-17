@@ -20,6 +20,9 @@ snake = get_snake()
 easy = tkinter.Button(text="Easy")
 normal = tkinter.Button(text="Normal")
 hard = tkinter.Button(text="Hard")
+label = tkinter.Label(text="Enter your name:")
+text = tkinter.Text()
+button = tkinter.Button(text="Enter")
 
 
 def activate(e):
@@ -38,9 +41,30 @@ def activate(e):
     hard.pack_forget()
 
 
+def score(e):
+    global text
+    try:
+        with open("leaderboard.pickle", "rb") as f:
+            leaderboard = pickle.load(f)
+    except:
+        leaderboard = []
+    leaderboard.append((game_world.score, text.get("1.0", 'end-1c')))
+    leaderboard.sort(reverse=True)
+    if(len(leaderboard) > 10):
+        leaderboard = leaderboard[:10]
+    temp = ["{0}. {1}: {2}".format(str(index + 1), element[1], str(element[0]))
+            for index, element in enumerate(leaderboard)]
+    msgBox.showinfo("Leaderboard", "\n".join(str(e) for e in temp))
+    with open("leaderboard.pickle", "wb") as f:
+        f.truncate()
+        pickle.dump(leaderboard, f)
+    os.execl(sys.executable, sys.executable, *sys.argv)
+
+
 easy.bind('<Button-1>', activate)
 normal.bind('<Button-1>', activate)
 hard.bind('<Button-1>', activate)
+button.bind('<Button-1>', score)
 
 
 # TODO:: implement this
@@ -65,25 +89,16 @@ def grow_snake():
 
 
 def end_game():
+    check.proton_frame_logic = None
     set_color_string("red")
     print_text_to_screen(0, 0, "Game Over")
     time.sleep(2)
-    try:
-        with open("leaderboard.pickle", "rb") as f:
-            leaderboard = pickle.load(f)
-    except:
-        leaderboard = []
-    leaderboard.append(game_world.score)
-    leaderboard.sort(reverse=True)
-    if(len(leaderboard) > 10):
-        leaderboard = leaderboard[:10]
-    temp = ["{0}. {1}".format(str(index + 1), str(element))
-            for index, element in enumerate(leaderboard)]
-    msgBox.showinfo("Leaderboard", "\n".join(str(e) for e in temp))
-    with open("leaderboard.pickle", "wb") as f:
-        f.truncate()
-        pickle.dump(leaderboard, f)
-    os.execl(sys.executable, sys.executable, *sys.argv)
+    global label
+    global text
+    global button
+    label.pack()
+    text.pack()
+    button.pack()
 
 
 # TODO:: implement this
