@@ -14,21 +14,26 @@ import pickle
     what it must be able to do.
 """
 
-snake = get_snake()
+snake = get_snake()  # Gets snake object
 
 
+# Declaring GUI elements
 easy = tkinter.Button(text="Easy")
 normal = tkinter.Button(text="Normal")
 hard = tkinter.Button(text="Hard")
 label = tkinter.Label(text="Enter your name:")
-text = tkinter.Text()
+text = tkinter.Entry()
 button = tkinter.Button(text="Enter")
 
 
 def activate(e):
+    """
+    Event handler for difficulty buttons
+    """
     global easy
     global normal
     global hard
+    # Setting an appropriate speed for the selected difficulty
     if(e.widget == easy):
         set_game_speed(180)
     elif(e.widget == normal):
@@ -36,19 +41,23 @@ def activate(e):
     elif(e.widget == hard):
         set_game_speed(60)
     check.proton_frame_logic = frame_logic
+    # Removing unnecessary GUI elements
     easy.pack_forget()
     normal.pack_forget()
     hard.pack_forget()
 
 
 def score(e):
+    """
+    This function manages the leaderboard
+    """
     global text
     try:
         with open("leaderboard.pickle", "rb") as f:
             leaderboard = pickle.load(f)
     except:
         leaderboard = []
-    leaderboard.append((game_world.score, text.get("1.0", 'end-1c')))
+    leaderboard.append((game_world.score, text.get()))
     leaderboard.sort(reverse=True)
     if(len(leaderboard) > 10):
         leaderboard = leaderboard[:10]
@@ -61,6 +70,7 @@ def score(e):
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
+# Binding the difficulty buttons to their event handler
 easy.bind('<Button-1>', activate)
 normal.bind('<Button-1>', activate)
 hard.bind('<Button-1>', activate)
@@ -89,13 +99,22 @@ def grow_snake():
 
 
 def end_game():
+    """
+    This function is called when the player loses
+    """
     check.proton_frame_logic = None
     set_color_string("red")
     print_text_to_screen(0, 0, "Game Over")
-    time.sleep(2)
+    try:
+        import winsound
+        winsound.Beep(100, 1000)
+    except:
+        time.sleep(1)
+    time.sleep(1)
     global label
     global text
     global button
+    # Displays name registering GUI elements
     label.pack()
     text.pack()
     button.pack()
@@ -106,8 +125,8 @@ def frame_logic():  # Don't change the name of this function
     """
         This function now only changes the food location each frame into a random location which is obviously wrong :D, 
         add your own code that defines what happens when each frame is drawn, it should basically move the snake and 
-        update the score and the food. 
-        a simple code example: 
+        update the score and the food.
+        a simple code example:
             move_snake()
             if (get_food_position() == calculate_snake_next_position()):
                 change_food_location(random_point())
@@ -115,20 +134,24 @@ def frame_logic():  # Don't change the name of this function
     """
     global snake
     for index, point in enumerate(snake.body):
+        # Checking if the snake's head is out of the grid
         if (is_out_of_screen(snake.body[len(snake.body) - 1])):
             end_game()
             break
+        # Checking if the snake had eaten itself
         elif(point == snake.body[len(snake.body) - 1]):
             if(index != len(snake.body) - 1):
                 end_game()
                 break
     else:
+        # Checking if the snake has eaten the food
         if (get_food_position() == snake.body[len(snake.body) - 1]):
             try:
                 import winsound
-                winsound.Beep(440, 250)
+                winsound.Beep(1000, 250)
             except:
                 pass
+            # Respawns food in an empty position
             while True:
                 rand = random_point()
                 if(rand not in snake.body):
@@ -155,11 +178,12 @@ def setup():  # Don't change the name of this function
         winsound.PlaySound(
             soundfile, winsound.SND_FILENAME | winsound.SND_ASYNC)
     except:
-        pass
+        print("Your operating system doesn't support sound playback")
 
 
 # DO NOT CHANGE THIS FUNCTION
 def submit_your_functions():
+    # Displaying difficulty buttons
     global easy
     easy.pack()
     global normal
